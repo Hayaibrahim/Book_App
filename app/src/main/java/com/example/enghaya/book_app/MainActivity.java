@@ -4,9 +4,9 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Bundle;
 import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Adapter;
@@ -20,7 +20,6 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -30,7 +29,6 @@ import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity {
     final String search = "www.google.com";
-    final String searchbooks = "https://books.google.com/?hl=ar";
     TextView text;
     EditText meditText;
     BookAdapter adapter;
@@ -49,12 +47,6 @@ public class MainActivity extends AppCompatActivity {
         mlistView.setAdapter(adapter);
         mimageButton.setOnClickListener(new View.OnClickListener() {
 
-            public boolean isInternetConnectionAvailable() {
-                ConnectivityManager connect = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-                NetworkInfo net = connect.getActiveNetworkInfo();
-                return net.isConnectedOrConnecting();
-            }
-
             @Override
             public void onClick(View view) {
                 if (isInternetConnectionAvailable()) {
@@ -66,23 +58,17 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
-        Book[] books = new Book[0];
-        if (savedInstanceState != null)
-
-            books = (Book[]) savedInstanceState.getParcelableArray(search);
-        adapter.addAll(books);
-    }
-
-    public boolean isInternetConnectionAvailable(Context context) {
-
-        ConnectivityManager Connectivity = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo network = Connectivity.getActiveNetworkInfo();
-        if (network != null && network.isConnected()) {
-            return true;
+        if (savedInstanceState != null) {
+            Book[] book = (Book[]) savedInstanceState.getParcelableArray(search);
+            adapter.addAll(book);
         }
-        return false;
     }
 
+    public boolean isInternetConnectionAvailable() {
+        ConnectivityManager connect = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo net = connect.getActiveNetworkInfo();
+        return net.isConnectedOrConnecting();
+    }
 
     public void update(List<Book> books) {
         //I use if statment beacouse
@@ -110,41 +96,6 @@ public class MainActivity extends AppCompatActivity {
         return url;
     }
 
-    public class BooksAsyncTask extends AsyncTask<URL, Void, List<Book>> {
-        @Override
-        protected List<Book> doInBackground(URL... urls) {
-            URL url = forUrl(Http());
-            String Josn = "   ";
-            try {
-                Josn = useHttp(url);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            List<Book> book = Bookjosn(Josn);
-            return book;
-        }
-
-
-        protected void onPostExecute(List<Book> result) {
-            if (result == null) {
-                return;
-            }
-            // result published on completion of doInBackground function
-            update(result);
-        }
-
-        private URL forUrl(String http) {
-            try {
-
-                return new URL(http);
-            } catch (MalformedURLException m) {
-                m.printStackTrace();
-                return null;
-            }
-        }
-    }
-
     private String useHttp(URL url) throws IOException {
 
         InputStream stream = null;
@@ -155,17 +106,18 @@ public class MainActivity extends AppCompatActivity {
         }
         try {
             connection = (HttpsURLConnection) url.openConnection();
+            // For this use case, set HTTP method to GET.
+            connection.setRequestMethod("GET");
             // Timeout for reading InputStream arbitrarily set to 3000ms.
             connection.setReadTimeout(1000);
             // Timeout for connection.connect() arbitrarily set to 3000ms.
+
             connection.setConnectTimeout(1500);
-            // For this use case, set HTTP method to GET.
-            connection.setRequestMethod("GET");
-            // Already true by default but setting just in case; needs to be true since this request
-            // is carrying an input (response) body.
-            connection.setDoInput(true);
             // Open communications link (network traffic occurs here).
             connection.connect();
+            // Already true by default but setting just in case; needs to be true since this request
+            // is carrying an input (response) body.
+
             if (connection.getResponseCode() == HttpsURLConnection.HTTP_OK) {
                 stream = connection.getInputStream();
                 result = readinputstream(stream);
@@ -225,5 +177,40 @@ public class MainActivity extends AppCompatActivity {
             books[i] = (Book) adapter.getItem(i);
         }
         outState.putParcelableArray(search, (Parcelable[]) books);
+    }
+
+    public class BooksAsyncTask extends AsyncTask<URL, Void, List<Book>> {
+        @Override
+        protected List<Book> doInBackground(URL... urls) {
+            URL url = forUrl(Http());
+            String Josn = "   ";
+            try {
+                Josn = useHttp(url);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            List<Book> book = Bookjosn(Josn);
+            return book;
+        }
+
+
+        protected void onPostExecute(List<Book> result) {
+            if (result == null) {
+                return;
+            }
+            // result published on completion of doInBackground function
+            update(result);
+        }
+
+        private URL forUrl(String http) {
+            try {
+
+                return new URL(http);
+            } catch (MalformedURLException m) {
+                m.printStackTrace();
+                return null;
+            }
+        }
     }
 }
