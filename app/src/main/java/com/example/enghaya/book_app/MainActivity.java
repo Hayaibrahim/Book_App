@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String Http() {
-        final String searchbooks = "https://books.google.com/?hl=ar";
+        final String searchbooks = "https://www.googleapis.com/books/v1/volumes?q=android&maxResults=1";
         String inputforuser = url().trim().replaceAll("\\+", "+");
         String url = searchbooks + inputforuser;
 
@@ -109,10 +109,10 @@ public class MainActivity extends AppCompatActivity {
             // For this use case, set HTTP method to GET.
             connection.setRequestMethod("GET");
             // Timeout for reading InputStream arbitrarily set to 3000ms.
-            connection.setReadTimeout(1000);
+            connection.setReadTimeout(10000);
             // Timeout for connection.connect() arbitrarily set to 3000ms.
+            connection.setConnectTimeout(15000);
 
-            connection.setConnectTimeout(1500);
             // Open communications link (network traffic occurs here).
             connection.connect();
             // Already true by default but setting just in case; needs to be true since this request
@@ -125,7 +125,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("MainActivity", "try again" + connection.getResponseCode());
 
             }
-
         } catch (IOException e) {
             e.printStackTrace();
             // Retrieve the response body as an InputStream.
@@ -147,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
     public String readinputstream(InputStream input) throws IOException {
         StringBuilder builder = new StringBuilder();
         if (input != null) {
-            InputStreamReader reader = new InputStreamReader(input, Charset.forName("Haya"));
+            InputStreamReader reader = new InputStreamReader(input, Charset.forName("UTF-8"));
             BufferedReader buffer = new BufferedReader(reader);
             String Linebyline = buffer.readLine();
             if (Linebyline != null) {
@@ -180,8 +179,7 @@ public class MainActivity extends AppCompatActivity {
         outState.putParcelableArray(search, (Parcelable[]) books);
     }
 
-    public class BooksAsyncTask extends AsyncTask<URL, Void, List<Book>> {
-        @Override
+    public class BooksAsyncTask extends AsyncTask<String, Void, List<Book>> {
         protected List<Book> doInBackground(URL... urls) {
             URL url = forUrl(Http());
             String Josn = "   ";
@@ -195,6 +193,10 @@ public class MainActivity extends AppCompatActivity {
             return book;
         }
 
+        @Override
+        protected List<Book> doInBackground(String... strings) {
+            return null;
+        }
 
         protected void onPostExecute(List<Book> result) {
             if (result == null) {
