@@ -38,6 +38,7 @@ public class Query {
     public static List<Book> extractBooks(String json) {
         // Create an empty ArrayList that we can start adding book to
         List<Book> books = new ArrayList<>();
+        Log.d("test", json);
 // Try to parse the SAMPLE_JSON_RESPONSE. If there's a problem with the way the JSON
         // is formatted, a JSONException exception object will be thrown.
         try {

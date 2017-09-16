@@ -1,6 +1,7 @@
 package com.example.enghaya.book_app;
 
 import android.content.Context;
+import android.database.DataSetObserver;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
@@ -9,6 +10,7 @@ import android.os.Parcelable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Adapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -28,7 +30,7 @@ import java.util.List;
 import javax.net.ssl.HttpsURLConnection;
 
 public class MainActivity extends AppCompatActivity {
-    final String search = "www.google.com";
+    final String search = "https://www.googleapis.com/books/v1/volumes?q=android&maxResults=1";
     TextView text;
     EditText meditText;
     BookAdapter adapter;
@@ -50,8 +52,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 if (isInternetConnectionAvailable()) {
-                    BooksAsyncTask books = new BooksAsyncTask();
-                    books.execute();
+                    //gBooksAsyncTask books = new BooksAsyncTask();
+                    new BooksAsyncTask().execute();
                 } else {
                     Toast.makeText(MainActivity.this, R.string.hello_blank_fragment,
                             Toast.LENGTH_SHORT).show();
@@ -89,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String Http() {
-        final String searchbooks = "https://www.googleapis.com/books/v1/volumes?q=android&maxResults=1";
+        final String searchbooks = "https://www.googleapis.com/books/v1/volumes?q=a";
         String inputforuser = url().trim().replaceAll("\\+", "+");
         String url = searchbooks + inputforuser;
 
@@ -108,11 +110,10 @@ public class MainActivity extends AppCompatActivity {
             connection = (HttpsURLConnection) url.openConnection();
             // For this use case, set HTTP method to GET.
             connection.setRequestMethod("GET");
-            // Timeout for reading InputStream arbitrarily set to 3000ms.
+            // Timeout for reading InputStream arbitrarily set to 10000.
             connection.setReadTimeout(10000);
-            // Timeout for connection.connect() arbitrarily set to 3000ms.
+            // Timeout for connection.connect() arbitrarily set to 150000.
             connection.setConnectTimeout(15000);
-
             // Open communications link (network traffic occurs here).
             connection.connect();
             // Already true by default but setting just in case; needs to be true since this request
@@ -144,12 +145,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public String readinputstream(InputStream input) throws IOException {
+
         StringBuilder builder = new StringBuilder();
         if (input != null) {
             InputStreamReader reader = new InputStreamReader(input, Charset.forName("UTF-8"));
             BufferedReader buffer = new BufferedReader(reader);
             String Linebyline = buffer.readLine();
-            if (Linebyline != null) {
+            while (Linebyline != null) {
                 builder.append(Linebyline);
                 Linebyline = buffer.readLine();
             }
@@ -168,7 +170,62 @@ public class MainActivity extends AppCompatActivity {
 
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Adapter adapter = null;
+        Adapter adapter = new Adapter() {
+            @Override
+            public void registerDataSetObserver(DataSetObserver dataSetObserver) {
+
+            }
+
+            @Override
+            public void unregisterDataSetObserver(DataSetObserver dataSetObserver) {
+
+            }
+
+            @Override
+            public int getCount() {
+                return 0;
+            }
+
+            @Override
+            public Object getItem(int i) {
+                return null;
+            }
+
+            @Override
+            public long getItemId(int i) {
+                return 0;
+            }
+
+            @Override
+            public boolean hasStableIds() {
+                return false;
+            }
+
+            @Override
+            public View getView(int i, View view, ViewGroup viewGroup) {
+                return null;
+            }
+
+            @Override
+            public int getItemViewType(int i) {
+                return 0;
+            }
+
+            @Override
+            public int getViewTypeCount() {
+                return 0;
+            }
+
+            @Override
+            public boolean isEmpty() {
+                return false;
+            }
+
+            @Override
+            public CharSequence[] getAutofillOptions() {
+                return new CharSequence[0];
+            }
+        };
         Book[] books = new Book[adapter.getCount()];
         int i = 0;
 
@@ -180,7 +237,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public class BooksAsyncTask extends AsyncTask<String, Void, List<Book>> {
-        protected List<Book> doInBackground(URL... urls) {
+
+        @Override
+        protected List<Book> doInBackground(String... strings) {
             URL url = forUrl(Http());
             String Josn = "   ";
             try {
@@ -192,17 +251,10 @@ public class MainActivity extends AppCompatActivity {
             List<Book> book = Bookjosn(Josn);
             return book;
         }
-
-        @Override
-        protected List<Book> doInBackground(String... strings) {
-            return null;
-        }
-
         protected void onPostExecute(List<Book> result) {
             if (result == null) {
                 return;
             }
-            // result published on completion of doInBackground function
             update(result);
         }
 
