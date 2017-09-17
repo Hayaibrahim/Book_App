@@ -67,9 +67,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public boolean isInternetConnectionAvailable() {
+
         ConnectivityManager connect = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo net = connect.getActiveNetworkInfo();
-        return net.isConnectedOrConnecting();
+        boolean isConnected = net != null && net.isConnectedOrConnecting();
+
+        // return net.isConnectedOrConnecting();
+        return isConnected;
     }
 
     public void update(List<Book> books) {
@@ -77,11 +81,11 @@ public class MainActivity extends AppCompatActivity {
         // cheack a book is found or not  found
         if (books.isEmpty()) {
             text.setVisibility(View.VISIBLE);
+            text.setText("The informative message.");
+
         } else {
             text.setVisibility(View.GONE);
-
         }
-
         adapter.clear();
         adapter.addAll(books);
     }
@@ -251,6 +255,7 @@ public class MainActivity extends AppCompatActivity {
             List<Book> book = Bookjosn(Josn);
             return book;
         }
+
         protected void onPostExecute(List<Book> result) {
             if (result == null) {
                 return;

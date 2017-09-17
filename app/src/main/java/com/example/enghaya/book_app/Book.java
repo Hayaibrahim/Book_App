@@ -8,6 +8,17 @@ import android.os.Parcelable;
  */
 
 public class Book implements Parcelable {
+    public static final Creator<Book> CREATOR = new Creator<Book>() {
+        @Override
+        public Book createFromParcel(Parcel in) {
+            return new Book(in);
+        }
+
+        @Override
+        public Book[] newArray(int size) {
+            return new Book[size];
+        }
+    };
     String titleinformation;
     String author;
 
@@ -31,18 +42,6 @@ public class Book implements Parcelable {
     public int describeContents() {
         return 0;
     }
-
-    public static final Creator<Book> CREATOR = new Creator<Book>() {
-        @Override
-        public Book createFromParcel(Parcel in) {
-            return new Book(in);
-        }
-
-        @Override
-        public Book[] newArray(int size) {
-            return new Book[size];
-        }
-    };
 
     public String getTitleinformation() {
         return titleinformation;
