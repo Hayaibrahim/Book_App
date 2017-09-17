@@ -1,6 +1,7 @@
 package com.example.enghaya.book_app;
 
 import android.content.Context;
+import android.content.res.Configuration;
 import android.database.DataSetObserver;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -271,6 +272,52 @@ public class MainActivity extends AppCompatActivity {
                 m.printStackTrace();
                 return null;
             }
+        }
+    }
+
+    public class BooksAsyncTask extends AsyncTask<String, Void, List<Book>> {
+
+        @Override
+        protected List<Book> doInBackground(String... strings) {
+            URL url = forUrl(Http());
+            String Josn = "   ";
+            try {
+                Josn = useHttp(url);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            List<Book> book = Bookjosn(Josn);
+            return book;
+        }
+
+        protected void onPostExecute(List<Book> result) {
+            if (result == null) {
+                return;
+            }
+            update(result);
+        }
+
+        private URL forUrl(String http) {
+            try {
+
+                return new URL(http);
+            } catch (MalformedURLException m) {
+                m.printStackTrace();
+                return null;
+            }
+        }
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+
+        // Checks the orientation of the screen
+        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+            Toast.makeText(this, "landscape", Toast.LENGTH_SHORT).show();
+        } else if (newConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
+            Toast.makeText(this, "portrait", Toast.LENGTH_SHORT).show();
         }
     }
 
