@@ -81,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
         // cheack a book is found or not  found
         if (books.isEmpty()) {
             text.setVisibility(View.VISIBLE);
-            text.setText("The informative message.");
+            text.setText("The book was not found, kindly search for another book");
 
         } else {
             text.setVisibility(View.GONE);
@@ -273,4 +273,6 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+
 }
