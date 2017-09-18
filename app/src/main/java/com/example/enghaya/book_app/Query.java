@@ -56,7 +56,23 @@ public class Query {
                 JSONObject bookInfo = bookObject.getJSONObject("volumeInfo");
 
                 String title = bookInfo.getString("title");
-                JSONArray authorsArray = bookInfo.getJSONArray("authors");
+                String authorName = "  ";
+
+                JSONArray authorsArray = bookInfo.optJSONArray("authors");
+                if (authorsArray == null) {
+                    authorName = "Unknown";
+                } else {
+                    for (int k = 0; k < authorsArray.length(); k++) {
+                        String authors = authorsArray.getString(k);
+                        if (authorName.isEmpty()) {
+                            authorName = authors;
+                        } else if (k == authorsArray.length() - 1) ;
+                        authorName = authorName + "and" + authors;
+                        //
+                        //    }else{
+                        //authorName = authorName + "  ,  " + authors;
+                    }
+                }
                 String authors = formatListOfAuthors(authorsArray);
 
                 Book book = new Book(authors, title);
