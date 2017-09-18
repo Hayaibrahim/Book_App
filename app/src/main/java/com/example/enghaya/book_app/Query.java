@@ -18,6 +18,7 @@ public class Query {
 
     private Query() {
     }
+
     public static String formatListOfAuthors(JSONArray authorsList) throws JSONException {
 
         String authorsListInString = null;
